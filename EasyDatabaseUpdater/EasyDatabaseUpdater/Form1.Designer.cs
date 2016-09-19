@@ -34,7 +34,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(908, 478);
+            this.ClientSize = new System.Drawing.Size(908, 497);
             this.Name = "Form1";
             this.Text = "Easy Database Updater";
             this.ResumeLayout(false);
