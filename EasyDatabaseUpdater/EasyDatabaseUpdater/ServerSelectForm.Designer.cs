@@ -36,6 +36,8 @@
             this.passwordTxtBox = new System.Windows.Forms.TextBox();
             this.integratedSecurityRdoBtn = new System.Windows.Forms.RadioButton();
             this.sqlAccountRdoBtn = new System.Windows.Forms.RadioButton();
+            this.cancelBtn = new System.Windows.Forms.Button();
+            this.nextBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // serverNameLbl
@@ -110,11 +112,33 @@
             this.sqlAccountRdoBtn.UseVisualStyleBackColor = true;
             this.sqlAccountRdoBtn.CheckedChanged += new System.EventHandler(this.rdoBtn_CheckedChanged);
             // 
+            // cancelBtn
+            // 
+            this.cancelBtn.Location = new System.Drawing.Point(17, 180);
+            this.cancelBtn.Name = "cancelBtn";
+            this.cancelBtn.Size = new System.Drawing.Size(75, 23);
+            this.cancelBtn.TabIndex = 8;
+            this.cancelBtn.Text = "Cancel";
+            this.cancelBtn.UseVisualStyleBackColor = true;
+            this.cancelBtn.Click += new System.EventHandler(this.cancelBtn_Click);
+            // 
+            // nextBtn
+            // 
+            this.nextBtn.Location = new System.Drawing.Point(176, 180);
+            this.nextBtn.Name = "nextBtn";
+            this.nextBtn.Size = new System.Drawing.Size(75, 23);
+            this.nextBtn.TabIndex = 9;
+            this.nextBtn.Text = "Next";
+            this.nextBtn.UseVisualStyleBackColor = true;
+            this.nextBtn.Click += new System.EventHandler(this.nextBtn_Click);
+            // 
             // ServerSelectForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(300, 200);
+            this.ClientSize = new System.Drawing.Size(273, 215);
+            this.Controls.Add(this.nextBtn);
+            this.Controls.Add(this.cancelBtn);
             this.Controls.Add(this.sqlAccountRdoBtn);
             this.Controls.Add(this.integratedSecurityRdoBtn);
             this.Controls.Add(this.passwordTxtBox);
@@ -140,5 +164,7 @@
         private System.Windows.Forms.TextBox passwordTxtBox;
         private System.Windows.Forms.RadioButton integratedSecurityRdoBtn;
         private System.Windows.Forms.RadioButton sqlAccountRdoBtn;
+        private System.Windows.Forms.Button cancelBtn;
+        private System.Windows.Forms.Button nextBtn;
     }
 }
