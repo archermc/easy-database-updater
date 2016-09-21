@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace EasyDatabaseUpdater
 {
-    public partial class Form1 : Form
+    public partial class TableSelectForm : Form
     {
-        public Form1()
+        public TableSelectForm()
         {
             InitializeComponent();
         }

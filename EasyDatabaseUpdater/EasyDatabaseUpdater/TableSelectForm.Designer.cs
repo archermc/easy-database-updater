@@ -1,6 +1,6 @@
 ﻿namespace EasyDatabaseUpdater
 {
-    partial class Form1
+    partial class TableSelectForm
     {
         /// <summary>
         /// Required designer variable.
