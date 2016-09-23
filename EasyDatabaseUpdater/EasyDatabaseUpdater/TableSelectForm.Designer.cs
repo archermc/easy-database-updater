@@ -82,6 +82,7 @@
             this.Controls.Add(this.databaseSelectorCmbBox);
             this.Name = "TableSelectForm";
             this.Text = "Easy Database Updater";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.TableSelectForm_FormClosed);
             this.ResumeLayout(false);
 
         }

@@ -53,15 +53,25 @@ namespace EasyDatabaseUpdater
                 DataTable schema = con.GetSchema("Tables");
 
                 foreach (DataRow row in schema.Rows)
-                {
                     tableNameLstBox.Items.Add(row[2].ToString());
-                }                
             }
         }
 
         private void exportTablesBtn_Click(object sender, EventArgs e)
         {
+            List<string> tableNames = new List<string>();
 
+            foreach (var item in tableNameLstBox.CheckedItems)
+                tableNames.Add(item.ToString());
+
+            Hide();
+            ExcelExportImportTool.ExportTablesToExcel(_connectionString+"initial catalog=" + databaseSelectorCmbBox.SelectedItem,tableNames);
+            Show();
+        }
+
+        private void TableSelectForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
