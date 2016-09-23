@@ -70,6 +70,7 @@
             this.importTablesBtn.TabIndex = 3;
             this.importTablesBtn.Text = "Import Tables";
             this.importTablesBtn.UseVisualStyleBackColor = true;
+            this.importTablesBtn.Click += new System.EventHandler(this.importTablesBtn_Click);
             // 
             // TableSelectForm
             // 

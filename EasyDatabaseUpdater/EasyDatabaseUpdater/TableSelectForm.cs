@@ -64,14 +64,21 @@ namespace EasyDatabaseUpdater
             foreach (var item in tableNameLstBox.CheckedItems)
                 tableNames.Add(item.ToString());
 
-            Hide();
-            ExcelExportImportTool.ExportTablesToExcel(_connectionString+"initial catalog=" + databaseSelectorCmbBox.SelectedItem,tableNames);
-            Show();
+            using (var excelTool = new ExcelExportImportTool(_connectionString + "initial catalog=" + databaseSelectorCmbBox.SelectedItem))
+                excelTool.ExportTablesToExcel(tableNames);
+
+            MessageBox.Show("Tables successfully exported!");
         }
 
         private void TableSelectForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Application.Exit();
+        }
+
+        private void importTablesBtn_Click(object sender, EventArgs e)
+        {
+            using (var excelTool = new ExcelExportImportTool(_connectionString + "initial catalog=" + databaseSelectorCmbBox.SelectedItem))
+                excelTool.ImportTablesFromExcel();
         }
     }
 }
