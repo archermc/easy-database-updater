@@ -8,17 +8,24 @@ using DataTable = System.Data.DataTable;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Globalization;
+using System.Threading;
 
 namespace EasyDatabaseUpdater
 {
     public class ExcelExportImportTool : IDisposable
     {
         private string _connectionString;
+        private string _dtFormat;
         private List<DataTable> _originalTables;
 
         public ExcelExportImportTool(string connectionString)
         {
+            CultureInfo en = new CultureInfo("en-US");
+            Thread.CurrentThread.CurrentCulture = en;
+
             _connectionString = connectionString;
+            _dtFormat = "MM/dd/yyyy HH:mm:ss";
             _originalTables = null;
         }
 
@@ -124,9 +131,9 @@ namespace EasyDatabaseUpdater
                     object[] row = table.Rows[j].ItemArray;
 
                     for (int l = 0; l < row.Length; l++)
-                    { 
+                    {
                         if (table.Columns[l].DataType == typeof(DateTime))
-                            cells[j + 2, l + 1].Value = ((DateTime)row[l]).ToString("MM-dd-yyyy hh:mm:ss");
+                            cells[j + 2, l + 1].Value = ((DateTime)row[l]).ToString(_dtFormat); //"MM/dd/yyyy hh:mm:ss");
                         else
                             cells[j + 2, l + 1].Value = row[l];
                     }
@@ -223,6 +230,7 @@ namespace EasyDatabaseUpdater
             for (int sheetInd = 0; sheetInd < sh.Count; sheetInd++)
             {
                 DataTable currentTable = importedTables[sheetInd];
+
                 // get the schema from the original table using the Sheet name
                 ws = sh[currentTable.TableName];
                 usedRange = ws.UsedRange;
@@ -237,13 +245,41 @@ namespace EasyDatabaseUpdater
                     DataRow row = currentTable.NewRow();
 
                     for (int c = 0; c < row.ItemArray.Length; c++)
-                        row[c] = cells[r, c + 1];
+                    {
+                        if (_originalTables[sheetInd].Columns[c].DataType == typeof(DateTime))
+                        {
+                            DateTime dt = new DateTime();
+                            bool success = DateTime.TryParseExact(cells[r, c + 1].ToString(), _dtFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt);
+
+                            if (success)
+                                row[c] = dt;
+                            else
+                                throw new Exception();
+                        }
+                        else
+                            row[c] = cells[r, c + 1];
+                    }
 
                     currentTable.Rows.Add(row);
                 }
             }
 
+            wb.Close();
+            excel.Quit();
+
+            Marshal.FinalReleaseComObject(cells);
+            Marshal.FinalReleaseComObject(ws);
+            Marshal.FinalReleaseComObject(sh);
+            Marshal.FinalReleaseComObject(wb);
+            Marshal.FinalReleaseComObject(wbs);
+            Marshal.FinalReleaseComObject(excel);
+
             return importedTables;
+        }
+
+        public List<Modification> FindTableDifferences()
+        {
+            return new List<Modification>();
         }
 
         private List<DataTable> GetDataTableClones(List<string> tableNames)

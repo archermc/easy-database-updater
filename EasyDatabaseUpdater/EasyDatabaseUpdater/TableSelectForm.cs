@@ -78,7 +78,10 @@ namespace EasyDatabaseUpdater
         private void importTablesBtn_Click(object sender, EventArgs e)
         {
             using (var excelTool = new ExcelExportImportTool(_connectionString + "initial catalog=" + databaseSelectorCmbBox.SelectedItem))
+            {
                 excelTool.ImportTablesFromExcel();
+                excelTool.
+            }
         }
     }
 }
