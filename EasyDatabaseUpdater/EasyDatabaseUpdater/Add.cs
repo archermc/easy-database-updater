@@ -10,6 +10,7 @@ namespace EasyDatabaseUpdater
     {
         public string GenerateSQLCommand()
         {
+            // TODO: Add add command functionality
             throw new NotImplementedException();
         }
     }

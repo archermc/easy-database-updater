@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace EasyDatabaseUpdater
 {
-    class Delete
+    class Delete : IModification
     {
+        string IModification.GenerateSQLCommand()
+        {
+            // TODO: Add delete command generation
+            throw new NotImplementedException();
+        }
     }
 }

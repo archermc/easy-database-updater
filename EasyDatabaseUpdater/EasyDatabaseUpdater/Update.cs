@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace EasyDatabaseUpdater
 {
-    class Update
+    class Update : IModification
     {
+        public string GenerateSQLCommand()
+        {
+            // TODO: Add update command functionality
+            throw new NotImplementedException();
+        }
     }
 }

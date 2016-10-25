@@ -9,6 +9,5 @@ namespace EasyDatabaseUpdater
     public interface IModification
     {
         string GenerateSQLCommand();
-
     }
 }

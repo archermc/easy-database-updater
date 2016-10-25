@@ -277,9 +277,11 @@ namespace EasyDatabaseUpdater
             return importedTables;
         }
 
-        public List<Modification> FindTableDifferences()
+        public List<IModification> FindTableDifferences()
         {
-            return new List<Modification>();
+
+            // TODO: add finding of table differences
+            return new List<IModification>();
         }
 
         private List<DataTable> GetDataTableClones(List<string> tableNames)

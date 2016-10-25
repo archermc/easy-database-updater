@@ -80,7 +80,7 @@ namespace EasyDatabaseUpdater
             using (var excelTool = new ExcelExportImportTool(_connectionString + "initial catalog=" + databaseSelectorCmbBox.SelectedItem))
             {
                 excelTool.ImportTablesFromExcel();
-                excelTool.
+                //excelTool.
             }
         }
     }
