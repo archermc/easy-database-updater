@@ -29,6 +29,13 @@ namespace EasyDatabaseUpdater
             _originalTables = null;
         }
 
+        /// <summary>
+        /// Takes a list of table names (or all the table names if no table names are provided) and extracts them from
+        /// the database in the connection string and exports them from the database to Excel
+        /// </summary>
+        /// <param name="tableNames">The names of tables contained in the database that the connection string
+        /// refers to that we want to extract to Excel</param>
+        /// <returns></returns>
         public bool ExportTablesToExcel(List<string> tableNames = null)
         {
             var datatablesToExport = new List<DataTable>();
@@ -41,6 +48,7 @@ namespace EasyDatabaseUpdater
                     con.Open();
                     DataTable schema = con.GetSchema("Tables");
 
+                    // each table name is in a specific row in the database schema
                     foreach (DataRow row in schema.Rows)
                         tableNames.Add(row[2].ToString());
                 }
@@ -51,12 +59,14 @@ namespace EasyDatabaseUpdater
             {
                 con.Open();
 
+                // take the tablename and use a SELECT statement to get the rows
                 foreach (string tableName in tableNames)
                 {
                     DataTable table = new DataTable();
 
                     string command = "SELECT * FROM " + tableName;
 
+                    // after building the command we use the SqlDataAdapter to fill the schema and actual rows of the DataTable
                     using (var cmd = new SqlCommand(command, con))
                     {
                         SqlDataAdapter adapt = new SqlDataAdapter(cmd);
@@ -76,6 +86,12 @@ namespace EasyDatabaseUpdater
             return true;
         }
 
+
+        /// <summary>
+        /// Writes each table selected to Excel using the interop
+        /// </summary>
+        /// <param name="tables">Tables to write to the chosen Excel file</param>
+        /// <returns>String representation of the file location the tables were saved at.</returns>
         private string WriteDataTablesToExcel(List<DataTable> tables)
         {
             SaveFileDialog saveFile = new SaveFileDialog();
@@ -104,7 +120,7 @@ namespace EasyDatabaseUpdater
             Range pkColumn = null;
             Interior pkInterior = null;
 
-            // start for each
+            // for each table add all of its rows to Excel
             for (int currentTableIndex = 0; currentTableIndex < tables.Count; currentTableIndex++)
             {
                 DataTable table = tables[currentTableIndex];
@@ -196,6 +212,10 @@ namespace EasyDatabaseUpdater
             return saveFile.FileName; //filepath
         }
 
+        /// <summary>
+        /// Imports a set of Tables from Excel into a Datatable List
+        /// </summary>
+        /// <returns>DataTable list that contains each table imported from Excel file</returns>
         public List<DataTable> ImportTablesFromExcel()
         {
             List<DataTable> importedTables;
@@ -267,7 +287,7 @@ namespace EasyDatabaseUpdater
             wb.Close();
             excel.Quit();
 
-            Marshal.FinalReleaseComObject(cells);
+            //Marshal.FinalReleaseComObject(cells);
             Marshal.FinalReleaseComObject(ws);
             Marshal.FinalReleaseComObject(sh);
             Marshal.FinalReleaseComObject(wb);
@@ -277,13 +297,32 @@ namespace EasyDatabaseUpdater
             return importedTables;
         }
 
-        public List<IModification> FindTableDifferences()
+        /// <summary>
+        /// Compares the two tables and attempts to tell whether the modified table has changed, adding it to the list of IModifications
+        /// that include either an add, delete, or update
+        /// </summary>
+        /// <param name="modifiedTable">the table that was modified in Excel to be compared to the original table</param>
+        /// <returns>List of modifications to write to the table</returns>
+        public List<IModification> FindTableDifferences(List<DataTable> modifiedTables)
         {
+            // TODO: finish table differences
+            foreach (DataTable modifiedTable in modifiedTables)
+            {
+                // get the original table to compare against the modified table
+                DataTable originalTable = _originalTables.Where(c => _originalTables.Any(l => c.TableName == l.TableName)).ToArray()[0];
 
-            // TODO: add finding of table differences
+
+            }
+
+
             return new List<IModification>();
         }
 
+        /// <summary>
+        /// Clones the tables in the database and adds them to the original tables List.
+        /// </summary>
+        /// <param name="tableNames">The names of all the tables in the database you need to clone</param>
+        /// <returns>List of tables that were cloned</returns>
         private List<DataTable> GetDataTableClones(List<string> tableNames)
         {
             _originalTables = new List<DataTable>();

@@ -59,6 +59,21 @@ namespace EasyDatabaseUpdater
 
         private void exportTablesBtn_Click(object sender, EventArgs e)
         {
+            ExportTables();
+        }
+
+        private void TableSelectForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void importTablesBtn_Click(object sender, EventArgs e)
+        {
+            ImportTables();
+        }
+
+        private void ExportTables()
+        {
             List<string> tableNames = new List<string>();
 
             foreach (var item in tableNameLstBox.CheckedItems)
@@ -70,17 +85,12 @@ namespace EasyDatabaseUpdater
             MessageBox.Show("Tables successfully exported!");
         }
 
-        private void TableSelectForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void importTablesBtn_Click(object sender, EventArgs e)
+        private void ImportTables()
         {
             using (var excelTool = new ExcelExportImportTool(_connectionString + "initial catalog=" + databaseSelectorCmbBox.SelectedItem))
             {
-                excelTool.ImportTablesFromExcel();
-                //excelTool.
+                List<DataTable> modifiedTables = excelTool.ImportTablesFromExcel();
+                excelTool.FindTableDifferences(modifiedTables);
             }
         }
     }

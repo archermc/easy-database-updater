@@ -12,6 +12,8 @@ namespace EasyDatabaseUpdater
         {
             // TODO: Add add command functionality
             throw new NotImplementedException();
+
+
         }
     }
 }
