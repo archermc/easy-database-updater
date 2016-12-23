@@ -90,7 +90,7 @@ namespace EasyDatabaseUpdater
             using (var excelTool = new ExcelExportImportTool(_connectionString + "initial catalog=" + databaseSelectorCmbBox.SelectedItem))
             {
                 List<DataTable> modifiedTables = excelTool.ImportTablesFromExcel();
-                excelTool.FindTableDifferences(modifiedTables);
+                List<IModification> modifications = excelTool.FindTableDifferences(modifiedTables);
             }
         }
     }

@@ -49,6 +49,7 @@
     <Compile Include="Add.cs" />
     <Compile Include="Delete.cs" />
     <Compile Include="ExcelExportImportTool.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="IModification.cs" />
     <Compile Include="ServerSelectForm.cs">
       <SubType>Form</SubType>

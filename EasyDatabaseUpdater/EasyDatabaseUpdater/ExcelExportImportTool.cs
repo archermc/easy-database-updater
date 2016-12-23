@@ -305,17 +305,126 @@ namespace EasyDatabaseUpdater
         /// <returns>List of modifications to write to the table</returns>
         public List<IModification> FindTableDifferences(List<DataTable> modifiedTables)
         {
+            var mods = new List<IModification>();
+
             // TODO: finish table differences
-            foreach (DataTable modifiedTable in modifiedTables)
+            // TODO: add fringe cases (one table empty, none of the primary keys match)
+            // TODO: add functionality that doesn't require dozens of SQL connections for each go-through
+            for (int j = 0; j < modifiedTables.Count; j++)
             {
                 // get the original table to compare against the modified table
-                DataTable originalTable = _originalTables.Where(c => _originalTables.Any(l => c.TableName == l.TableName)).ToArray()[0];
+                DataTable modifiedTable = modifiedTables[j];
+                DataTable originalTable = _originalTables.Where(c => modifiedTables.Any(l => c.TableName == l.TableName)).ToArray()[j];
 
+                int numRowsOriginal = originalTable.Rows.Count;
+                int numRowsModified = modifiedTable.Rows.Count;
 
+                // iterate through every row in order to compare primary keys and move on however much is necessary
+                int modifiedRowCount = 0;
+                int originalRowCount = 0;
+
+                for (; 
+                    originalRowCount < numRowsOriginal && modifiedRowCount < numRowsModified;
+                    originalRowCount++, modifiedRowCount++)
+                {
+                    DataRow originalRow = originalTable.Rows[originalRowCount];
+                    DataRow modifiedRow = modifiedTable.Rows[modifiedRowCount];
+
+                    if (PrimaryKeysMatch(originalRow, modifiedRow))
+                    {
+                        // if the entire rows are equal then make an update
+                        if (!originalRow.RowEquals(modifiedRow))
+                            mods.Add(new Update(originalRow, modifiedRow));
+
+                        continue;
+                    }
+                    else
+                    {
+                        // if the keys don't match it's either an add or a delete
+
+                        // we get some new counters to incrememnt so that we don't increment the other counters
+                        int newOriginalRowCount = originalRowCount;
+                        int newModifiedRowCount = modifiedRowCount;
+                        bool foundMatch = false;
+                        var deleteQueue = new List<IModification>();
+                        var addQueue = new List<IModification>();
+
+                        // ADD
+                        // scroll through the modified rows until you find one that matches and add those to the add queue
+                        // TODO: add case of when an add streak ends with an update
+                        addQueue.Add(new Add(modifiedRow));
+                        while (!foundMatch && ++newModifiedRowCount != numRowsModified)
+                        {
+                            DataRow newModifiedRow = modifiedTable.Rows[newModifiedRowCount];
+
+                            if (originalRow.RowEquals(newModifiedRow))
+                            {
+                                foundMatch = true;
+                                modifiedRowCount = newModifiedRowCount;
+                                mods.AddRange(addQueue);
+                            } else
+                            {
+                                addQueue.Add(new Add(newModifiedRow));
+                            }
+                        }
+
+                        // delete
+                        // scroll through the original rows until you find one that matches and add the rest to the add queue
+                        deleteQueue.Add(new Delete(originalRow));
+                        while (!foundMatch && ++newOriginalRowCount != numRowsOriginal)
+                        {
+                            DataRow newOriginalRow = originalTable.Rows[newOriginalRowCount];
+
+                            if (originalRow.RowEquals(newOriginalRow))
+                            {
+                                foundMatch = true;
+                                originalRowCount = newOriginalRowCount;
+                                mods.AddRange(deleteQueue);
+                            }
+                            else
+                            {
+                                deleteQueue.Add(new Delete(newOriginalRow));
+                            }
+                        }
+                    }
+                }
+
+                while (originalRowCount < numRowsOriginal)
+                    mods.Add(new Delete(originalTable.Rows[originalRowCount++]));
+                while (modifiedRowCount < numRowsModified)
+                    mods.Add(new Add(modifiedTable.Rows[modifiedRowCount++]));
             }
 
+            return mods;
+        }
 
-            return new List<IModification>();
+        private bool PrimaryKeysMatch(DataRow row1, DataRow row2)
+        {
+            object[] row1Arr = row1.ItemArray;
+            object[] row2Arr = row2.ItemArray;
+            bool[] primaryKeyMask = GetPrimaryKeyMask(row1);
+
+            for (int i = 0; i < row1.ItemArray.Length; i++)
+            {
+                if (primaryKeyMask[i] && !row1Arr[i].Equals(row2Arr[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// ugly large predicate where I simply cast the primary key columns into trues in a boolean aray 
+        /// representing all the columns
+        /// </summary>
+        /// <param name="row">the row of which we want to find the primary keys</param>
+        /// <returns>boolean array representing the primary key columns in the DataTable with trues</returns>
+        private bool[] GetPrimaryKeyMask(DataRow row)
+        {
+            return row.Table.Columns.Cast<DataColumn>()
+                .Select(c => row.Table.PrimaryKey
+                .Select(l => l.ColumnName)
+                .Contains(c.ColumnName)).ToArray();
         }
 
         /// <summary>
