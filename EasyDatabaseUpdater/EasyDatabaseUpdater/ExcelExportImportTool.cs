@@ -167,12 +167,12 @@ namespace EasyDatabaseUpdater
                 usedRange.ColumnWidth = 20;
                 rows = usedRange.Rows;
                 cols = usedRange.Columns;
-                
+
                 for (int col = 0; col < table.Columns.Count; col++)
                 {
                     if (GetPrimaryKeys(table)[col])
                     {
-                        pkColumn = ws.Range[usedRange[2,col + 1], usedRange[rows.Count,col+1]];
+                        pkColumn = ws.Range[usedRange[2, col + 1], usedRange[rows.Count, col + 1]];
                         pkInterior = pkColumn.Interior;
                         pkInterior.Color = System.Drawing.Color.LightYellow;
                     }
@@ -323,7 +323,7 @@ namespace EasyDatabaseUpdater
                 int modifiedRowCount = 0;
                 int originalRowCount = 0;
 
-                for (; 
+                for (;
                     originalRowCount < numRowsOriginal && modifiedRowCount < numRowsModified;
                     originalRowCount++, modifiedRowCount++)
                 {
@@ -375,7 +375,7 @@ namespace EasyDatabaseUpdater
                         {
                             DataRow newOriginalRow = originalTable.Rows[newOriginalRowCount];
 
-                            if (originalRow.RowEquals(newOriginalRow))
+                            if (modifiedRow.RowEquals(newOriginalRow))
                             {
                                 foundMatch = true;
                                 originalRowCount = newOriginalRowCount;
@@ -389,6 +389,7 @@ namespace EasyDatabaseUpdater
                     }
                 }
 
+                // add the rows at the end of either the original or modified row based on which finished first
                 while (originalRowCount < numRowsOriginal)
                     mods.Add(new Delete(originalTable.Rows[originalRowCount++]));
                 while (modifiedRowCount < numRowsModified)
@@ -398,6 +399,41 @@ namespace EasyDatabaseUpdater
             return mods;
         }
 
+        /// <summary>
+        /// ExecuteSQLCommands takes each modification in the modification list and attempts to apply it to the
+        /// current database.
+        /// </summary>
+        /// <param name="connectionString">The string to connect to the database.</param>
+        /// <param name="modifications">The list of modifications which need to be applied.</param>
+        /// <returns>Boolean representing whether the modifications executed properly.</returns>
+        public bool ExecuteSQLCommands(string connectionString, List<IModification> modifications)
+        {
+            using (var con = new SqlConnection(connectionString))
+            {
+                con.Open();
+
+                // take each modification and generate the sql to execute and store it in a string
+                foreach (IModification mod in modifications)
+                {
+                    string command = mod.GenerateSQLCommand();
+
+                    // after building the command we execute it to add, delete, or update
+                    using (var cmd = new SqlCommand(command, con))
+                        cmd.ExecuteNonQuery();
+                }
+
+                con.Close();
+            }
+            
+            return true;
+        }
+
+        /// <summary>
+        /// A method designed to tell if the primary keys of two data rows are equal.
+        /// </summary>
+        /// <param name="row1">First data row to compare</param>
+        /// <param name="row2">Second data row to compare</param>
+        /// <returns>Boolean representing whether the data rows are equal</returns>
         private bool PrimaryKeysMatch(DataRow row1, DataRow row2)
         {
             object[] row1Arr = row1.ItemArray;
@@ -405,10 +441,8 @@ namespace EasyDatabaseUpdater
             bool[] primaryKeyMask = GetPrimaryKeyMask(row1);
 
             for (int i = 0; i < row1.ItemArray.Length; i++)
-            {
                 if (primaryKeyMask[i] && !row1Arr[i].Equals(row2Arr[i]))
                     return false;
-            }
 
             return true;
         }
@@ -421,10 +455,12 @@ namespace EasyDatabaseUpdater
         /// <returns>boolean array representing the primary key columns in the DataTable with trues</returns>
         private bool[] GetPrimaryKeyMask(DataRow row)
         {
-            return row.Table.Columns.Cast<DataColumn>()
+            return row.Table.Columns
+                .Cast<DataColumn>()
                 .Select(c => row.Table.PrimaryKey
                 .Select(l => l.ColumnName)
-                .Contains(c.ColumnName)).ToArray();
+                .Contains(c.ColumnName))
+                .ToArray();
         }
 
         /// <summary>
@@ -465,7 +501,11 @@ namespace EasyDatabaseUpdater
         /// <returns>A boolean array with cooresponding "true" values at the indices of the primary keys.</returns>
         private static bool[] GetPrimaryKeys(DataTable table)
         {
-            return table.Columns.OfType<DataColumn>().ToList().Select(s => table.PrimaryKey.Contains(s)).ToArray();
+            return table.Columns
+                .OfType<DataColumn>()
+                .ToList()
+                .Select(s => table.PrimaryKey.Contains(s))
+                .ToArray();
         }
 
         public void Dispose()

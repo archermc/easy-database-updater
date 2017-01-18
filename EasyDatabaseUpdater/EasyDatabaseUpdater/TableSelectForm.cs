@@ -91,6 +91,7 @@ namespace EasyDatabaseUpdater
             {
                 List<DataTable> modifiedTables = excelTool.ImportTablesFromExcel();
                 List<IModification> modifications = excelTool.FindTableDifferences(modifiedTables);
+                bool noErrors = excelTool.ExecuteSQLCommands(_connectionString, modifications);
             }
         }
     }
