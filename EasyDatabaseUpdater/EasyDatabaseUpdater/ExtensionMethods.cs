@@ -19,5 +19,19 @@ namespace EasyDatabaseUpdater
 
             return true;
         }
+
+        /// <summary>
+        /// Creates a boolean array of trues and falses based on whether that index of DataTable.Columns is a primary key.
+        /// </summary>
+        /// <param name="table">DataTable to find the primary keys of.</param>
+        /// <returns>A boolean array with cooresponding "true" values at the indices of the primary keys.</returns>
+        public static bool[] GetPrimaryKeys(this DataTable table)
+        {
+            return table.Columns
+                .OfType<DataColumn>()
+                .ToList()
+                .Select(s => table.PrimaryKey.Contains(s))
+                .ToArray();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace EasyDatabaseUpdater
             modifiedRow = mRow;
         }
 
-        public string GenerateSQLCommand()
+        public SqlCommand GenerateSQLCommand(SqlConnection con)
         {
             // TODO: Add update command functionality
             throw new NotImplementedException();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,16 +18,38 @@ namespace EasyDatabaseUpdater
             rowToAdd = toAdd;
         }
 
-        public string GenerateSQLCommand()
+        public SqlCommand GenerateSQLCommand(SqlConnection con)
         {
-            StringBuilder command = new StringBuilder("INSERT INTO " + rowToAdd.Table.TableName + " VALUES (");
+            StringBuilder commandStr = new StringBuilder("INSERT INTO " + rowToAdd.Table.TableName + " (");
+            StringBuilder valuesStr = new StringBuilder("VALUES (");
+            SqlCommand command = new SqlCommand();
 
-            foreach (var r in rowToAdd.ItemArray)
-                command.Append(r.ToString() + ", ");
+            //for (int i = 0; i < rowToAdd.ItemArray.Length; i++)
+            //{
+            //    if (rowToAdd.Table.Columns[i].AutoIncrement)
+            //    {
+            //        command.Parameters.AddWithValue("@paramd", "DEFAULT");
+            //        commandStr.Append("@paramd, ");
+            //    }
 
-            string toReturn = Regex.Replace(command.ToString(),", $", ");");
+            //    command.Parameters.AddWithValue("@param" + i, rowToAdd.ItemArray[i]);
+            //    commandStr.Append("@param" + i + ", ");
+            //}
 
-            return toReturn;
+            for (int i = 0; i < rowToAdd.ItemArray.Length; i++)
+            {
+                if (!rowToAdd.Table.Columns[i].AutoIncrement)
+                {
+                    command.Parameters.AddWithValue("@param" + i, rowToAdd.ItemArray[i]);
+                    commandStr.Append(rowToAdd.Table.Columns[i].ColumnName + ", ");
+                    valuesStr.Append("@param" + i + ", ");
+                }
+            }
+
+            command.CommandText = Regex.Replace(commandStr.ToString(), ", $", ") ") + Regex.Replace(valuesStr.ToString(), ", $", ");");
+            command.Connection = con;
+
+            return command;
         }
     }
 }

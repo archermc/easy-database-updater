@@ -170,7 +170,7 @@ namespace EasyDatabaseUpdater
 
                 for (int col = 0; col < table.Columns.Count; col++)
                 {
-                    if (GetPrimaryKeys(table)[col])
+                    if ((table.GetPrimaryKeys())[col])
                     {
                         pkColumn = ws.Range[usedRange[2, col + 1], usedRange[rows.Count, col + 1]];
                         pkInterior = pkColumn.Interior;
@@ -362,7 +362,8 @@ namespace EasyDatabaseUpdater
                                 foundMatch = true;
                                 modifiedRowCount = newModifiedRowCount;
                                 mods.AddRange(addQueue);
-                            } else
+                            }
+                            else
                             {
                                 addQueue.Add(new Add(newModifiedRow));
                             }
@@ -406,23 +407,17 @@ namespace EasyDatabaseUpdater
         /// <param name="connectionString">The string to connect to the database.</param>
         /// <param name="modifications">The list of modifications which need to be applied.</param>
         /// <returns>Boolean representing whether the modifications executed properly.</returns>
-        public bool ExecuteSQLCommands(string connectionString, List<IModification> modifications)
+        public bool ExecuteSQLCommands(List<IModification> modifications)
         {
-            using (var con = new SqlConnection(connectionString))
+            using (var con = new SqlConnection(_connectionString))
             {
                 con.Open();
 
                 // take each modification and generate the sql to execute and store it in a string
                 foreach (IModification mod in modifications)
-                {
-                    string command = mod.GenerateSQLCommand();
-
                     // after building the command we execute it to add, delete, or update
-                    using (var cmd = new SqlCommand(command, con))
+                    using (var cmd = mod.GenerateSQLCommand(con))
                         cmd.ExecuteNonQuery();
-                }
-
-                con.Close();
             }
             
             return true;
@@ -492,20 +487,6 @@ namespace EasyDatabaseUpdater
             }
 
             return tableClones;
-        }
-
-        /// <summary>
-        /// Creates a boolean array of trues and falses based on whether that index of DataTable.Columns is a primary key.
-        /// </summary>
-        /// <param name="table">DataTable to find the primary keys of.</param>
-        /// <returns>A boolean array with cooresponding "true" values at the indices of the primary keys.</returns>
-        private static bool[] GetPrimaryKeys(DataTable table)
-        {
-            return table.Columns
-                .OfType<DataColumn>()
-                .ToList()
-                .Select(s => table.PrimaryKey.Contains(s))
-                .ToArray();
         }
 
         public void Dispose()
