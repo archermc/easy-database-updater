@@ -21,6 +21,18 @@ namespace EasyDatabaseUpdater
 
         public SqlCommand GenerateSQLCommand(SqlConnection con)
         {
+            StringBuilder commandStr = new StringBuilder("UPDATE " + originalRow.Table.TableName + " SET ");
+            // TODO: FINISH UPDATE
+            SqlCommand command = new SqlCommand();
+
+            for (int i = 0; i < originalRow.ItemArray.Length; i++)
+            {
+                if (!originalRow.Table.Columns[i].AutoIncrement &&
+                    !originalRow.ItemArray[i].Equals(modifiedRow.ItemArray[i]))
+                {
+                    commandStr.Append("")
+                }
+            }
             // TODO: Add update command functionality
             throw new NotImplementedException();
         }

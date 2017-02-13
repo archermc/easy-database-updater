@@ -24,18 +24,6 @@ namespace EasyDatabaseUpdater
             StringBuilder valuesStr = new StringBuilder("VALUES (");
             SqlCommand command = new SqlCommand();
 
-            //for (int i = 0; i < rowToAdd.ItemArray.Length; i++)
-            //{
-            //    if (rowToAdd.Table.Columns[i].AutoIncrement)
-            //    {
-            //        command.Parameters.AddWithValue("@paramd", "DEFAULT");
-            //        commandStr.Append("@paramd, ");
-            //    }
-
-            //    command.Parameters.AddWithValue("@param" + i, rowToAdd.ItemArray[i]);
-            //    commandStr.Append("@param" + i + ", ");
-            //}
-
             for (int i = 0; i < rowToAdd.ItemArray.Length; i++)
             {
                 if (!rowToAdd.Table.Columns[i].AutoIncrement)

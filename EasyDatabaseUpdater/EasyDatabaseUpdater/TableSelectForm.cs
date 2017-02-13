@@ -74,6 +74,7 @@ namespace EasyDatabaseUpdater
 
         private void ExportTables()
         {
+            //TODO: fix improper incrementation of ID in Possessions table
             List<string> tableNames = new List<string>();
 
             foreach (var item in tableNameLstBox.CheckedItems)

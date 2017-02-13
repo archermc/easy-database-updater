@@ -20,21 +20,24 @@ namespace EasyDatabaseUpdater
 
         public SqlCommand GenerateSQLCommand(SqlConnection con)
         {
-            // TODO: Add delete command generation
-            StringBuilder command = new StringBuilder
+            StringBuilder commandStr = new StringBuilder
                 ("DELETE FROM " + rowToDelete.Table.TableName + " WHERE ");
+            SqlCommand command = new SqlCommand();
 
             bool[] pKeys = rowToDelete.Table.GetPrimaryKeys();
 
             for (int i = 0; i < pKeys.Length; i++)
             {
                 if (pKeys[i])
-                    command.Append(rowToDelete.Table.Columns[i].ColumnName + " = " + rowToDelete.ItemArray[i] + " AND ");
+                    commandStr.Append(rowToDelete.Table.Columns[i].ColumnName + " = " + rowToDelete.ItemArray[i] + " AND ");
             }
 
-            string toReturn = Regex.Replace(command.ToString(), " AND $", ";");
+            string toReturn = Regex.Replace(commandStr.ToString(), " AND $", ";");
 
-            return new SqlCommand(); 
+            command.CommandText = toReturn;
+            command.Connection = con;
+
+            return command;
         }
     }
 }
